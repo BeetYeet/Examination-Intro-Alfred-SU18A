@@ -25,7 +25,7 @@ public class World : MonoBehaviour {
 	private List<uint> pauseCodes; // if a pausecode appears here, dont unpause untill its gone
 
 	void Awake () { // make it awake so that it is called way before all other scripts so that they can cashe it in Start()
-		if ( World.current != null ) // íf there already is a world
+		if ( World.current != null ) // íf there already is an instance of World
 		{
 			Debug.LogError( "Multiple instances of World exist, please keep it to one", this ); // throw an error
 			return; // and return
