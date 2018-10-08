@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ShipControls : MonoBehaviour {
+public class ShipControls : Pausable
+{
 
 	public float shipSpeed = 3; //how fast should the ship move? (holding S will halve this)
 	public float rotateSpeed = 1f; //how fast should the ship rotate?
@@ -13,13 +14,35 @@ public class ShipControls : MonoBehaviour {
 	{                        //(1 being fully charged and 0 being completely empty)
 		get
 		{
-			return Mathf.Clamp01((Time.time - lastBlink)/blinkRecharge);
+			if ( nowPaused )
+			{
+				return blinkTime / blinkRecharge;
+			} else
+				return Mathf.Clamp01((Time.time - lastBlink)/blinkRecharge); //math to calculate the charge based on what time the last blink was done at, the current time and the time of recharge between blinks
 		}
 	}
 	public SpriteRenderer FrontSprite;
+	public float blinkTime {get; private set;} //for when the game is paused
 
-	void Start () {
-		
+	
+
+	void Start()
+	{
+		SubscribeToPause();
+	}
+
+	internal override void OnPauseChange()
+	{
+		base.OnPauseChange();
+		//we need to make sure the charge of the blink doesn't drift while we're paused
+		if ( nowPaused )
+		{ // if we just paused
+			blinkTime = Time.time - lastBlink; // store the blink state
+		}
+		else // if we just unpaused
+		{
+			lastBlink = Time.time - blinkTime;
+		}
 	}
 
 	void Blink()
