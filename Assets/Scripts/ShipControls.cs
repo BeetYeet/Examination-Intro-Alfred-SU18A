@@ -41,7 +41,7 @@ public class ShipControls : Pausable
 		}
 		else // if we just unpaused
 		{
-			lastBlink = Time.time - blinkTime;
+			lastBlink = Time.time - blinkTime; // calculate the proper values to emulate there not being a paus
 		}
 	}
 
@@ -56,7 +56,28 @@ public class ShipControls : Pausable
 	
 	void Update () {
 
-		
+		nowPaused = World.current.isPaused;
+		// Static stuff
+		Debug.Log( nowPaused );
+
+		if ( Input.GetKeyDown( KeyCode.P ) )
+		{
+			if ( nowPaused ) // if user wants to unpause
+			{
+				Debug.Log( "Unpaused" );
+				Debug.Log( World.current.Unpause( 3 )); //unpause with code 3
+			}
+			else // if user wants to pause
+			{
+				Debug.Log( "Paused" );
+				Debug.Log( World.current.Pause( 3 )); //pause with code 3
+			}
+		}
+		// Movement:
+		if ( nowPaused )
+			return;
+			
+
 		transform.Translate( 0f, shipSpeed * Time.deltaTime, 0f, Space.Self ); //move forward
 
 		if ( Input.GetKey( KeyCode.DownArrow ) ) // if the user wants to move slower

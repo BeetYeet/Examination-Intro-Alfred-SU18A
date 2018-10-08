@@ -14,7 +14,7 @@ public class World: MonoBehaviour
 	{
 		get
 		{
-			return pauseCodes.Count == 0;
+			return pauseCodes.Count != 0;
 		}
 	}
 	public event System.Action OnPauseChange; // all things that should be pausable must subscribe to this
@@ -23,7 +23,6 @@ public class World: MonoBehaviour
 	/*
 	 * Special pause codes:
 	 * 0 - requires force to be unpaused
-	 * 1 - startup
 	 */
 	private List<uint> pauseCodes; // if a pausecode appears here, dont unpause untill its gone
 
@@ -35,8 +34,8 @@ public class World: MonoBehaviour
 			return; // and return
 		}
 		World.current = this; // else just set it to this instance
-		pauseCodes = new List<uint>();
-		Pause( 1 ); // pause the game and wait for input so that we know that the user is ready to play
+		pauseCodes = new List<uint>(); //initialise the list
+		OnPauseChange += (  ) => { Debug.Log( isPaused ? "Paused" : "Unpaused" ); };
 	}
 
 
@@ -49,17 +48,21 @@ public class World: MonoBehaviour
 	{
 		if ( pauseCode == 0 )
 		{
-			Debug.LogError( "Disallowed pauscode: 0", this );
+			Debug.LogError( "Disallowed pausecode: 0", this );
 			return false;
 		}
-		bool returns = true; // a variable to store the result
-		if ( isPaused ) // if its already paused
+		if ( pauseCodes.Contains( pauseCode ) )
 		{
-			returns = false; //mark it in the variable
+			Debug.LogWarning( "Already paused with pausecode: " + pauseCode, this );
+			return false;
 		}
-		pauseCodes.Add( pauseCode ); //adds the pausecode to the List
+		else
+		{
+			pauseCodes.Add( pauseCode ); //adds the pausecode to the List
+			OnPauseChange();
+			return true;
+		}
 
-		return returns;
 	}
 
 
@@ -69,20 +72,26 @@ public class World: MonoBehaviour
 	/// <returns>returns true if it wasn't paused before</returns>
 	public bool Pause() // to pause the code, makes it not unpause unless its forced, returns true if it wasn't paused before
 	{
-		bool returns = true; // a variable to store the result
-		if ( isPaused ) // if its already paused
-		{
-			returns = false; //mark it in the variable
-		}
+		
 		if ( pauseCodes.Contains( 0 ) ) // if it is already forcefully paused
 		{
 			Debug.LogWarning( "Attempted to force a pause when it is already forcefully paused" ); // warn for it
-			//
+			return false;
 		}
-		else // we need to add it
+		if ( isPaused )
+		{
 			pauseCodes.Add( 0 ); //adds the pausecode for forcefull to the List
+			OnPauseChange();
+			return false;
+		}
+		else
+		{
+			pauseCodes.Add( 0 ); //adds the pausecode for forcefull to the List
+			OnPauseChange();
+			return true;
+		}
 
-		return returns;
+
 	}
 
 
@@ -104,10 +113,14 @@ public class World: MonoBehaviour
 	/// <returns>true if it successfully unpaused it, false if theres another pausecode keeping it from unpausing</returns>
 	public bool Unpause( uint pauseCode, bool allowNotThere )
 	{
-		bool wasPaused = isPaused;
-		bool returns = true; // a variable to store the result
 
 		if ( pauseCodes.Contains( pauseCode ) )
+		{
+			pauseCodes.Remove( pauseCode );
+			OnPauseChange();
+			return true;
+		}
+		else
 		{
 			if ( allowNotThere )
 			{
@@ -116,23 +129,11 @@ public class World: MonoBehaviour
 			Debug.LogError( "Errorcode does not exist, maby use allowNotThere parameter?" );
 			return false;
 		}
-
-
-
-		if ( isPaused ) // if its already paused
-		{
-			returns = false; //mark it in the variable
-		}
-		if ( wasPaused != isPaused )
-		{
-			OnPauseChange();
-		}
-		return returns;
 	}
 
 	void Update()
 	{
-
+	
 	}
 
 
@@ -146,7 +147,7 @@ public class Pausable: MonoBehaviour
 	public bool nowPaused
 	{
 		get;
-		private set;
+		internal set;
 	}
 	internal virtual void SubscribeToPause()
 	{
