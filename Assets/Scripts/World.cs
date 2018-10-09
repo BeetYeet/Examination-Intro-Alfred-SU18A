@@ -140,7 +140,7 @@ public class World: MonoBehaviour
 }
 
 /// <summary>
-/// A class to derive from if you want an autoupdated isPaused variable
+/// A class to derive from if you want an autoupdated nowPaused variable
 /// </summary>
 public class Pausable: MonoBehaviour
 {
