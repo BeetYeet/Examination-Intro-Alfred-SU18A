@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -23,8 +24,110 @@ public class ShipControls : Pausable
 	}
 	public SpriteRenderer FrontSprite;
 	public float blinkTime {get; private set;} //for when the game is paused
+	public ParticleSystem ps;
+	public float maxPlayerX = 8.8f;
+	public float maxPlayerY = 5f;
+	public int lastPrint;
+	public List<SpriteRenderer> coloredDetails;
 
-	
+
+	void Warp()
+	{
+		this.transform.position = new Vector3( -this.transform.position.x, -this.transform.position.y, this.transform.position.z );
+	}
+
+	void ColorDetails( Color c )
+	{
+		foreach ( SpriteRenderer s in coloredDetails )
+		{
+			s.color = c;
+		}
+	}
+
+	void Update () {
+
+		//print time
+		if ( Time.time > lastPrint + 1f )
+		{
+			lastPrint = Mathf.RoundToInt(Time.time);
+			Debug.Log("Time: " + lastPrint);
+		}
+
+		nowPaused = World.current.isPaused;
+		// Static stuff
+
+		if ( Input.GetKeyDown( KeyCode.P ) )
+		{
+			if ( nowPaused ) // if user wants to unpause
+			{
+				Debug.Log( "Unpaused" );
+				World.current.Unpause( 3 ); //unpause with code 3
+			}
+			else // if user wants to pause
+			{
+				Debug.Log( "Paused" );
+				World.current.Pause( 3 ); //pause with code 3
+			}
+		}
+		// Movement:
+		if ( nowPaused )
+			return;
+			
+
+		transform.Translate( 0f, shipSpeed * Time.deltaTime, 0f, Space.Self ); //move forward
+
+		if ( Input.GetKey( KeyCode.S ) ) // if the user wants to move slower
+		{
+			transform.Translate( 0f, -shipSpeed * 0.5f * Time.deltaTime, 0f, Space.Self ); // move halfway back ()
+		}
+
+		// blinkey stuff:
+
+		Color frontColor = new Color(0f, .5f + (BlinkCharge==1f?.3f:0f), BlinkCharge);
+		FrontSprite.color = frontColor;
+		if ( Input.GetKeyDown( KeyCode.W ) ) // if the user wants to blink
+		{
+			Blink();
+		}
+
+		//rotaty stuff:
+
+		ColorDetails( new Color( 0.98f, 0.77f, 0.33f ) );
+		if ( Input.GetKey( KeyCode.A ) ) // if the user wants to turn left
+		{
+			transform.Rotate( new Vector3( 0f, 0f, 1f ), rotateSpeed * 90 * Time.deltaTime ); // rotate left
+			ColorDetails(Color.green);
+		}
+		if ( Input.GetKey( KeyCode.D ) ) // if the user wants to turn right
+		{
+			transform.Rotate( new Vector3( 0f, 0f, 1f ), rotateSpeed * -90 * Time.deltaTime ); // rotate right
+			ColorDetails( Color.blue );
+		}
+
+		if ( this.transform.position.x > maxPlayerX )
+		{
+			this.transform.position += new Vector3(-0.1f, 0, 0);
+			Warp();
+		}
+
+		if ( this.transform.position.x < -maxPlayerX )
+		{
+			this.transform.position += new Vector3( 0.1f, 0, 0 );
+			Warp();
+		}
+
+		if ( this.transform.position.y > maxPlayerY )
+		{
+			this.transform.position += new Vector3( 0, -0.1f, 0 );
+			Warp();
+		}
+
+		if ( this.transform.position.y < -maxPlayerY )
+		{
+			this.transform.position += new Vector3( 0, 0.1f, 0 );
+			Warp();
+		}
+	}
 
 	void Start()
 	{
@@ -38,10 +141,12 @@ public class ShipControls : Pausable
 		if ( nowPaused )
 		{ // if we just paused
 			blinkTime = Time.time - lastBlink; // store the blink state
+			ps.Pause(); //pause the particle system
 		}
 		else // if we just unpaused
 		{
 			lastBlink = Time.time - blinkTime; // calculate the proper values to emulate there not being a paus
+			ps.Play(); //play the particle system
 		}
 	}
 
@@ -53,57 +158,9 @@ public class ShipControls : Pausable
 			lastBlink = Time.time;
 		}
 	}
-	
-	void Update () {
 
-		nowPaused = World.current.isPaused;
-		// Static stuff
-		Debug.Log( nowPaused );
-
-		if ( Input.GetKeyDown( KeyCode.P ) )
-		{
-			if ( nowPaused ) // if user wants to unpause
-			{
-				Debug.Log( "Unpaused" );
-				Debug.Log( World.current.Unpause( 3 )); //unpause with code 3
-			}
-			else // if user wants to pause
-			{
-				Debug.Log( "Paused" );
-				Debug.Log( World.current.Pause( 3 )); //pause with code 3
-			}
-		}
-		// Movement:
-		if ( nowPaused )
-			return;
-			
-
-		transform.Translate( 0f, shipSpeed * Time.deltaTime, 0f, Space.Self ); //move forward
-
-		if ( Input.GetKey( KeyCode.DownArrow ) ) // if the user wants to move slower
-		{
-			transform.Translate( 0f, -shipSpeed * 0.5f * Time.deltaTime, 0f, Space.Self ); // move halfway back ()
-		}
-
-		// blinkey stuff:
-
-		Color frontColor = new Color(0f, .5f + (BlinkCharge==1f?.3f:0f), BlinkCharge);
-		FrontSprite.color = frontColor;
-		if ( Input.GetKeyDown( KeyCode.UpArrow ) ) // if the user wants to blink
-		{
-			Blink();
-		}
-
-
-		//rotaty stuff:
-
-		if ( Input.GetKey( KeyCode.LeftArrow ) ) // if the user wants to turn left
-		{
-			transform.Rotate( new Vector3( 0f, 0f, 1f ), rotateSpeed * 90 * Time.deltaTime ); // rotate left
-		}
-		if ( Input.GetKey( KeyCode.RightArrow ) ) // if the user wants to turn right
-		{
-			transform.Rotate( new Vector3( 0f, 0f, 1f ), rotateSpeed * -90 * Time.deltaTime ); // rotate right
-		}
+	public void Respawn()
+	{
+		
 	}
 }

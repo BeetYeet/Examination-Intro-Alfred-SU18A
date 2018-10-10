@@ -35,9 +35,14 @@ public class World: MonoBehaviour
 		}
 		World.current = this; // else just set it to this instance
 		pauseCodes = new List<uint>(); //initialise the list
-		OnPauseChange += (  ) => { Debug.Log( isPaused ? "Paused" : "Unpaused" ); };
+		OnPauseChange += OnPause;
 	}
 
+	void OnPause()
+	{
+		Debug.Log( isPaused ? "Paused" : "Unpaused" );
+
+	}
 
 	/// <summary>
 	/// to pause the code
