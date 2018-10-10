@@ -107,12 +107,12 @@ public class ShipControls : Pausable
 			ColorDetails( new Color( 0.98f, 0.77f, 0.33f ) );
 		if ( Input.GetKey( KeyCode.A ) ) // if the user wants to turn left
 		{
-			transform.Rotate( new Vector3( 0f, 0f, 1f ), rotateSpeed * 90 * Time.deltaTime ); // rotate left
+			transform.Rotate( new Vector3( 0f, 0f, 1f ), rotateSpeed * 80 * Time.deltaTime ); // rotate left
 			ColorDetails(Color.green);
 		}
 		if ( Input.GetKey( KeyCode.D ) ) // if the user wants to turn right
 		{
-			transform.Rotate( new Vector3( 0f, 0f, 1f ), rotateSpeed * -90 * Time.deltaTime ); // rotate right
+			transform.Rotate( new Vector3( 0f, 0f, 1f ), rotateSpeed * -120 * Time.deltaTime ); // rotate right
 			ColorDetails( Color.blue );
 		}
 
