@@ -9,14 +9,14 @@ public class ShipControls : Pausable
 	public float rotateSpeed = 1f; //how fast should the ship rotate?
 	public float blinkDistance = 2f; //how far is a blink?
 	public float blinkRecharge = 2f; //how much time is there between allowed blinks?
-	public float lastBlink; //when did the user last blink?
+	private float lastBlink; //when did the user last blink?
 	public float BlinkCharge //returns a value between 1 and 0 showing how recharged blink is
 	{                        //(1 being fully charged and 0 being completely empty)
 		get
 		{
 			if ( nowPaused )
 			{
-				return blinkTime / blinkRecharge;
+				return blinkTime / blinkRecharge; // to emulate pausing Time.time
 			} else
 				return Mathf.Clamp01((Time.time - lastBlink)/blinkRecharge); //math to calculate the charge based on what time the last blink was done at, the current time and the time of recharge between blinks
 		}
@@ -26,7 +26,7 @@ public class ShipControls : Pausable
 	public ParticleSystem ps;
 	public float maxPlayerX = 8.8f;
 	public float maxPlayerY = 5f;
-	public int lastPrint;
+	private int lastPrint;
 	public List<SpriteRenderer> coloredDetails;
 
 	void RandomColor()
@@ -35,11 +35,6 @@ public class ShipControls : Pausable
 		float g = Random.Range( 0f, 1f );
 		float b = Random.Range( 0f, 1f );
 		ColorDetails(new Color(r, g, b));
-	}
-
-	void Warp()
-	{
-		this.transform.position = new Vector3( -this.transform.position.x, -this.transform.position.y, this.transform.position.z );
 	}
 
 	void ColorDetails( Color c )
@@ -66,12 +61,10 @@ public class ShipControls : Pausable
 		{
 			if ( nowPaused ) // if user wants to unpause
 			{
-				Debug.Log( "Unpaused" );
 				World.current.Unpause( 3 ); //unpause with code 3
 			}
 			else // if user wants to pause
 			{
-				Debug.Log( "Paused" );
 				World.current.Pause( 3 ); //pause with code 3
 			}
 		}
@@ -116,28 +109,16 @@ public class ShipControls : Pausable
 			ColorDetails( Color.blue );
 		}
 
-		if ( this.transform.position.x > maxPlayerX )
+		// stay on screen stuff
+
+		if ( this.transform.position.x > maxPlayerX || this.transform.position.x < -maxPlayerX ) // if not in screen
 		{
-			this.transform.position += new Vector3(-0.1f, 0, 0);
-			Warp();
+			this.transform.position = new Vector3( -Mathf.Clamp(this.transform.position.x, -maxPlayerX, maxPlayerX ), this.transform.position.y, this.transform.position.z ); //put on screen
 		}
 
-		if ( this.transform.position.x < -maxPlayerX )
+		if ( this.transform.position.y > maxPlayerY || this.transform.position.y < -maxPlayerY )
 		{
-			this.transform.position += new Vector3( 0.1f, 0, 0 );
-			Warp();
-		}
-
-		if ( this.transform.position.y > maxPlayerY )
-		{
-			this.transform.position += new Vector3( 0, -0.1f, 0 );
-			Warp();
-		}
-
-		if ( this.transform.position.y < -maxPlayerY )
-		{
-			this.transform.position += new Vector3( 0, 0.1f, 0 );
-			Warp();
+			this.transform.position = new Vector3( this.transform.position.x, -Mathf.Clamp( this.transform.position.y, -maxPlayerY, maxPlayerY ), this.transform.position.z ); //put on screen
 		}
 	}
 
@@ -169,10 +150,5 @@ public class ShipControls : Pausable
 			transform.Translate( 0f, blinkDistance, 0f, Space.Self ); //move blinkDistance far forward
 			lastBlink = Time.time;
 		}
-	}
-
-	public void Respawn()
-	{
-		
 	}
 }

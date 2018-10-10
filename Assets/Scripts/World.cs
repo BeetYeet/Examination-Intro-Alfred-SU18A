@@ -41,7 +41,14 @@ public class World: MonoBehaviour
 	void OnPause()
 	{
 		Debug.Log( isPaused ? "Paused" : "Unpaused" );
-
+		if ( isPaused )
+		{
+			Time.timeScale = 0.001f;
+		}
+		else
+		{
+			Time.timeScale = 1f;
+		}
 	}
 
 	/// <summary>
