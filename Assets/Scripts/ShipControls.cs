@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -30,6 +29,13 @@ public class ShipControls : Pausable
 	public int lastPrint;
 	public List<SpriteRenderer> coloredDetails;
 
+	void RandomColor()
+	{
+		float r = Random.Range( 0f, 1f );
+		float g = Random.Range( 0f, 1f );
+		float b = Random.Range( 0f, 1f );
+		ColorDetails(new Color(r, g, b));
+	}
 
 	void Warp()
 	{
@@ -69,6 +75,12 @@ public class ShipControls : Pausable
 				World.current.Pause( 3 ); //pause with code 3
 			}
 		}
+
+		if ( Input.GetKeyDown( KeyCode.Space ) )
+		{
+			RandomColor();
+		}
+
 		// Movement:
 		if ( nowPaused )
 			return;
@@ -91,8 +103,8 @@ public class ShipControls : Pausable
 		}
 
 		//rotaty stuff:
-
-		ColorDetails( new Color( 0.98f, 0.77f, 0.33f ) );
+		if ( Input.GetKeyUp( KeyCode.A ) || Input.GetKeyUp( KeyCode.D ) )
+			ColorDetails( new Color( 0.98f, 0.77f, 0.33f ) );
 		if ( Input.GetKey( KeyCode.A ) ) // if the user wants to turn left
 		{
 			transform.Rotate( new Vector3( 0f, 0f, 1f ), rotateSpeed * 90 * Time.deltaTime ); // rotate left
