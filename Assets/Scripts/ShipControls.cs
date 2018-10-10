@@ -23,41 +23,41 @@ public class ShipControls : Pausable
 	}
 	public SpriteRenderer FrontSprite;
 	public float blinkTime {get; private set;} //for when the game is paused
-	public ParticleSystem ps;
-	public float maxPlayerX = 8.8f;
-	public float maxPlayerY = 5f;
-	private int lastPrint;
-	public List<SpriteRenderer> coloredDetails;
+	public ParticleSystem ps; // för raketeffekt
+	public float maxPlayerX = 8.8f; // max X i positivt X led 
+	public float maxPlayerY = 5f; // max Y i positivt Y led
+	private int lastPrint; // senaste gången tiden printades
+	public List<SpriteRenderer> coloredDetails; // alla detaljer som ska färjas med ColorDetails()
 
-	void RandomColor()
+	void RandomColor() // randomiserar skeppets detaljer
 	{
+		//tre värden mellan 0 och 1 av typ float motsvarande röd, grön och blå
 		float r = Random.Range( 0f, 1f );
 		float g = Random.Range( 0f, 1f );
 		float b = Random.Range( 0f, 1f );
-		ColorDetails(new Color(r, g, b));
+		ColorDetails(new Color(r, g, b)); // färja detaljerna
 	}
 
-	void ColorDetails( Color c )
+	void ColorDetails( Color c ) //c är färjen som detaljerna ska få
 	{
-		foreach ( SpriteRenderer s in coloredDetails )
+		foreach ( SpriteRenderer s in coloredDetails ) // gå igenom alla spriterenderers
 		{
-			s.color = c;
+			s.color = c; // sätt de till färjen
 		}
 	}
 
 	void Update () {
 
 		//print time
-		if ( Time.time > lastPrint + 1f )
+		if ( Time.time > lastPrint + 1f ) // har det gått en sekund?
 		{
-			lastPrint = Mathf.RoundToInt(Time.time);
-			Debug.Log("Time: " + lastPrint);
+			lastPrint = Mathf.RoundToInt(Time.time); // ställ om variabeln
+			Debug.Log("Time: " + lastPrint); // printa den
 		}
-
-		nowPaused = World.current.isPaused;
+		
 		// Static stuff
 
-		if ( Input.GetKeyDown( KeyCode.P ) )
+		if ( Input.GetKeyDown( KeyCode.P ) ) // om spelaren vill pausa
 		{
 			if ( nowPaused ) // if user wants to unpause
 			{
@@ -69,14 +69,14 @@ public class ShipControls : Pausable
 			}
 		}
 
-		if ( Input.GetKeyDown( KeyCode.Space ) )
+		if ( Input.GetKeyDown( KeyCode.Space ) ) // om spelaren vill byta färg
 		{
-			RandomColor();
+			RandomColor(); // byt färg
 		}
 
 		// Movement:
-		if ( nowPaused )
-			return;
+		if ( nowPaused ) // om det är pausat
+			return; // hoppa över att göra saker som rör på skeppet
 			
 
 		transform.Translate( 0f, shipSpeed * Time.deltaTime, 0f, Space.Self ); //move forward
@@ -88,25 +88,24 @@ public class ShipControls : Pausable
 
 		// blinkey stuff:
 
-		Color frontColor = new Color(0f, .5f + (BlinkCharge==1f?.3f:0f), BlinkCharge);
-		FrontSprite.color = frontColor;
+		FrontSprite.color = new Color(0f, .5f + (BlinkCharge==1f?.3f:0f), BlinkCharge); // matte för färjen på framsidan
 		if ( Input.GetKeyDown( KeyCode.W ) ) // if the user wants to blink
 		{
-			Blink();
+			Blink(); // självförklarande
 		}
 
 		//rotaty stuff:
 		if ( Input.GetKeyUp( KeyCode.A ) || Input.GetKeyUp( KeyCode.D ) )
-			ColorDetails( new Color( 0.98f, 0.77f, 0.33f ) );
+			ColorDetails( new Color( 0.98f, 0.77f, 0.33f ) ); // om spelaren släpper vänster eller höger knapparna så byt tillbaka färjen (för att den randomiserade färjen inte ska försvinna)
 		if ( Input.GetKey( KeyCode.A ) ) // if the user wants to turn left
 		{
 			transform.Rotate( new Vector3( 0f, 0f, 1f ), rotateSpeed * 80 * Time.deltaTime ); // rotate left
-			ColorDetails(Color.green);
+			ColorDetails(Color.green);// självförklarande
 		}
 		if ( Input.GetKey( KeyCode.D ) ) // if the user wants to turn right
 		{
 			transform.Rotate( new Vector3( 0f, 0f, 1f ), rotateSpeed * -120 * Time.deltaTime ); // rotate right
-			ColorDetails( Color.blue );
+			ColorDetails( Color.blue );// självförklarande
 		}
 
 		// stay on screen stuff
@@ -116,7 +115,7 @@ public class ShipControls : Pausable
 			this.transform.position = new Vector3( -Mathf.Clamp(this.transform.position.x, -maxPlayerX, maxPlayerX ), this.transform.position.y, this.transform.position.z ); //put on screen
 		}
 
-		if ( this.transform.position.y > maxPlayerY || this.transform.position.y < -maxPlayerY )
+		if ( this.transform.position.y > maxPlayerY || this.transform.position.y < -maxPlayerY ) // if not in screen
 		{
 			this.transform.position = new Vector3( this.transform.position.x, -Mathf.Clamp( this.transform.position.y, -maxPlayerY, maxPlayerY ), this.transform.position.z ); //put on screen
 		}
@@ -124,10 +123,12 @@ public class ShipControls : Pausable
 
 	void Start()
 	{
-		SubscribeToPause();
+		SubscribeToPause(); // startfunktion till Pausable classen
+		shipSpeed += Random.Range( -1f, 1f ); // randomisering
+		this.transform.position = new Vector3( Random.Range( -maxPlayerX, maxPlayerX ), Random.Range( -maxPlayerY, maxPlayerY ) ); // randomisering
 	}
 
-	internal override void OnPauseChange()
+	internal override void OnPauseChange() // om spelet blivit pausat eller avpausat
 	{
 		base.OnPauseChange();
 		//we need to make sure the charge of the blink doesn't drift while we're paused
@@ -143,12 +144,12 @@ public class ShipControls : Pausable
 		}
 	}
 
-	void Blink()
+	void Blink() // blinka framåt
 	{
-		if ( BlinkCharge == 1f )
+		if ( BlinkCharge == 1f ) // om du har tillräckligt med charge
 		{
 			transform.Translate( 0f, blinkDistance, 0f, Space.Self ); //move blinkDistance far forward
-			lastBlink = Time.time;
+			lastBlink = Time.time; // håll koll på när vi blinkade
 		}
 	}
 }

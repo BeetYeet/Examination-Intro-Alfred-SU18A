@@ -355,12 +355,13 @@ MonoBehaviour:
   rotateSpeed: 2
   blinkDistance: 3
   blinkRecharge: 5
-  lastBlink: 0
   FrontSprite: {fileID: 212799884621142340}
   ps: {fileID: 198758561294390168}
   maxPlayerX: 8.8
   maxPlayerY: 5
-  lastPrint: 0
+  coloredDetails:
+  - {fileID: 212845501413903904}
+  - {fileID: 212760262793716482}
 --- !u!198 &198758561294390168
 ParticleSystem:
   m_ObjectHideFlags: 1
@@ -372,7 +373,7 @@ ParticleSystem:
   simulationSpeed: 1
   stopAction: 0
   looping: 1
-  prewarm: 1
+  prewarm: 0
   playOnAwake: 1
   useUnscaledTime: 0
   autoRandomSeed: 1
@@ -5309,7 +5310,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 5
   m_Sprite: {fileID: 21300000, guid: e87527edb84d24e4b9864fdb1fab5b3f, type: 3}
-  m_Color: {r: 0.9811321, g: 0.76951057, b: 0.32858673, a: 1}
+  m_Color: {r: 0.9811321, g: 0.7695106, b: 0.32858673, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
